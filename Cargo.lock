@@ -147,7 +147,7 @@ dependencies = [
 [[package]]
 name = "or-iter"
 version = "0.1.0"
-source = "git+https://github.com/archer884/or-iter.git#fa628467c6c57085fa770329193f028716db1bfe"
+source = "git+https://github.com/archer884/or-iter.git#78f79993a11b73f4774ffa27151507bf1c70d7c3"
 
 [[package]]
 name = "quote"
