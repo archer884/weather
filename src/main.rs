@@ -6,18 +6,18 @@ extern crate serde_derive;
 
 extern crate dotenv;
 extern crate hyper;
+extern crate or_iter;
 extern crate serde_json;
 
 mod client;
-mod iter;
 mod model;
 
 fn main() {
     use client::WeatherClient;
-    use iter::DefaultIter;
+    use or_iter::OrIter;
 
     let client = WeatherClient::new();
-    let queries = std::env::args().skip(1).default(|| dotenv!("DEFAULT_LOCATION").into());
+    let queries = std::env::args().skip(1).or(|| dotenv!("DEFAULT_LOCATION").into());
 
     for query in queries {
         match client.query(query) {
