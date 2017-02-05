@@ -14,7 +14,7 @@ impl WeatherClient {
     pub fn query<T: AsRef<str>>(&self, q: T) -> Result<Weather> {
         use std::io::Read;
 
-        let url = format!("http://api.openweathermap.org/data/2.5/weather?q={},US&APPID={}",
+        let url = format!("http://api.openweathermap.org/data/2.5/weather?q={}&APPID={}",
                           q.as_ref(),
                           &dotenv!("API_KEY"));
 
