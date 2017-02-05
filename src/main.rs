@@ -21,7 +21,7 @@ fn main() {
 
     for query in queries {
         match client.query(query) {
-            Err(e) => println!("Bad query: {}", e),
+            Err(e) => println!("{}", e),
             Ok(result) => println!("{}: {:.0}", result.city(), result.temperature()),
         }
     }
