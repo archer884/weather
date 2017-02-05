@@ -19,7 +19,7 @@ impl WeatherClient {
                           &dotenv!("API_KEY"));
 
         match self.0.get(&url).send() {
-            Err(_) => Err("server said no".into()),
+            Err(_) => Err(String::from("server said no")),
             Ok(mut response) => {
                 let mut buf = String::new();
                 response.read_to_string(&mut buf);
