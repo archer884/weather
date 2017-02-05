@@ -23,7 +23,7 @@ impl WeatherClient {
             Ok(mut response) => {
                 let mut buf = String::new();
                 response.read_to_string(&mut buf);
-                Ok(json::from_str(&buf).expect(&format!("bad response from server: {}", buf)))
+                json::from_str(&buf).map_err(|_| format!("bad response from server: {}", buf))
             }
         }
     }
