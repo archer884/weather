@@ -6,8 +6,7 @@ authors = ["J/A <archer884@gmail.com>"]
 [dependencies]
 dotenv = "*"
 dotenv_macros = "*"
-hyper = "*"
-or-iter = {git = "https://github.com/archer884/or-iter.git"}
+reqwest = "*"
 serde = "*"
 serde_derive = "*"
 serde_json = "*"

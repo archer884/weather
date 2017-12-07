@@ -1,32 +1,31 @@
-#![feature(plugin)]
+#![feature(conservative_impl_trait, plugin)]
 #![plugin(dotenv_macros)]
 
-#[macro_use]
-extern crate serde_derive;
+#[macro_use] extern crate serde_derive;
 
 extern crate dotenv;
-extern crate hyper;
-extern crate or_iter;
+extern crate reqwest;
+extern crate serde;
 extern crate serde_json;
 
-mod client;
+mod command;
+mod error;
 mod model;
+mod rest;
+
+static API_KEY: &str = dotenv!("OWM_API_KEY");
 
 fn main() {
-    use client::WeatherClient;
-    use or_iter::OrIter;
-
-    let client = WeatherClient::new();
-    let queries = std::env::args().skip(1).or(|| dotenv!("DEFAULT_LOCATION").into());
-
-    for query in queries {
-        match client.query(query) {
+    for query in command::queries() {
+        match rest::query(&query) {
             Err(e) => println!("{}", e),
             Ok(result) => {
-                println!("{}: {:.0} (wind speed: {:.0} mph)",
-                         result.city(),
-                         result.temperature(),
-                         result.wind_speed())
+                println!(
+                    "{}: {:.0} (wind speed: {:.0} mph)",
+                    result.city(),
+                    result.temperature(),
+                    result.wind_speed()
+                )
             }
         }
     }
