@@ -1,13 +1,14 @@
+use command::Query;
 use error::*;
 use model::*;
 use reqwest::Client;
 use serde_json as json;
 
-pub fn query<S: AsRef<str>>(query: S) -> Result<Weather> {
+pub fn query(query: &Query) -> Result<Weather> {
     use API_KEY;
     use std::io::Read;
     
-    let url = ApiUrl::new(API_KEY, query.as_ref());
+    let url = ApiUrl::new(API_KEY, query);
     let response = {
         let mut response = Client::new().get(&url.into_url()).send()?;
         let mut buf = String::new();
@@ -26,23 +27,16 @@ pub fn query<S: AsRef<str>>(query: S) -> Result<Weather> {
 #[derive(Debug)]
 struct ApiUrl<'a> {
     key: &'a str,
-    query: &'a str,
+    query: &'a Query,
 }
 
 impl<'a> ApiUrl<'a> {
-    fn new(key: &'a str, query: &'a str) -> Self {
+    fn new(key: &'a str, query: &'a Query) -> Self {
         Self { key, query }
     }
 
     fn into_url(self) -> String {
         let Self { key, query } = self;
-        let mut buf = String::new();
-        
-        buf.push_str("http://api.openweathermap.org/data/2.5/weather?q=");
-        buf.push_str(query);
-        buf.push_str("&APPID=");
-        buf.push_str(key);
-
-        buf
+        format!("http://api.openweathermap.org/data/2.5/weather?APPID={}&{}", key, query)
     }
 }
