@@ -1,3 +1,5 @@
+// We deactivate the 'unused' lint on this crate because that seems less destructive than
+// removing a lot of model properties that are not currently used by may eventually be used.
 #![allow(unused)]
 
 use serde::{Deserialize, Deserializer};
@@ -67,7 +69,14 @@ pub struct ApiError {
 impl<'a> Deserialize<'a> for ApiError {
     fn deserialize<D: Deserializer<'a>>(d: D) -> Result<Self, D::Error> {
         use serde::de::Error;
-        
+
+        // This is practically the canonical implementation of my favorite deserialization
+        // pattern: start with a template to transform text into something structured, then
+        // derive your real data based on that template.
+        //
+        // In this case, I also make use of a fairly easy mechanism for converting numeric
+        // parsing errors into deserialization errors.
+
         #[derive(Deserialize)]
         struct Template {
             #[serde(rename = "cod")]
@@ -77,7 +86,6 @@ impl<'a> Deserialize<'a> for ApiError {
 
         let Template { code, message } = Template::deserialize(d)?;
         Ok(Self {
-            // This has never been so easy before. It's beautimous.
             code: code.parse().map_err(|e| D::Error::custom(e))?,
             message,
         })
