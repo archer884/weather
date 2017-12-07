@@ -1,3 +1,9 @@
+#![allow(unused)]
+
+use serde::{Deserialize, Deserializer};
+use std::error;
+use std::fmt;
+
 #[derive(Deserialize)]
 pub struct Weather {
     name: String,
@@ -49,6 +55,44 @@ impl Weather {
     /// Wind speed in miles per hour.
     pub fn wind_speed(&self) -> f32 {
         self.wind.speed * (11.0 / 25.0)
+    }
+}
+
+#[derive(Debug)]
+pub struct ApiError {
+    code: i32,
+    message: String,
+}
+
+impl<'a> Deserialize<'a> for ApiError {
+    fn deserialize<D: Deserializer<'a>>(d: D) -> Result<Self, D::Error> {
+        use serde::de::Error;
+        
+        #[derive(Deserialize)]
+        struct Template {
+            #[serde(rename = "cod")]
+            code: String,
+            message: String,
+        }
+
+        let Template { code, message } = Template::deserialize(d)?;
+        Ok(Self {
+            // This has never been so easy before. It's beautimous.
+            code: code.parse().map_err(|e| D::Error::custom(e))?,
+            message,
+        })
+    }
+}
+
+impl fmt::Display for ApiError {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "{}: {}", self.code, self.message)
+    }
+}
+
+impl error::Error for ApiError {
+    fn description(&self) -> &str {
+        "An API error occurred"
     }
 }
 
