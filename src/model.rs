@@ -40,6 +40,52 @@ pub struct Wind {
     deg: f32,
 }
 
+pub enum WindDisplay {
+    N(f32, f32),
+    NE(f32, f32),
+    E(f32, f32),
+    SE(f32, f32),
+    S(f32, f32),
+    SW(f32, f32),
+    W(f32, f32),
+    NW(f32, f32),
+}
+
+impl Wind {
+    pub fn display(&self) -> WindDisplay {
+        match self.deg % 360.0 {
+            // North is split in two, because half is on the left side of 0.
+            deg if deg >= 337.5 && deg < 360.0 => WindDisplay::N(deg, self.speed), 
+            deg if deg >= 0.0 && deg < 22.5 => WindDisplay::N(deg, self.speed),
+            
+            deg if deg >= 22.5 && deg < 67.5 => WindDisplay::NE(deg, self.speed),
+            deg if deg >= 67.5 && deg < 112.5 => WindDisplay::E(deg, self.speed),
+            deg if deg >= 112.5 && deg < 157.5 => WindDisplay::SE(deg, self.speed),
+            deg if deg >= 157.5 && deg < 202.5 => WindDisplay::S(deg, self.speed),
+            deg if deg >= 202.5 && deg < 247.5 => WindDisplay::SW(deg, self.speed),
+            deg if deg >= 247.5 && deg < 292.5 => WindDisplay::W(deg, self.speed),
+            deg if deg >= 292.5 && deg < 337.5 => WindDisplay::NW(deg, self.speed),
+
+            _ => panic!("What a world! What a world...."),
+        }
+    }
+}
+
+impl fmt::Display for WindDisplay {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        match *self {
+            WindDisplay::N(deg, speed) => write!(f, "Wind {:.0} mph N", speed * (11.0 / 25.0)),
+            WindDisplay::NE(deg, speed) => write!(f, "Wind {:.0} mph NE", speed * (11.0 / 25.0)),
+            WindDisplay::E(deg, speed) => write!(f, "Wind {:.0} mph E", speed * (11.0 / 25.0)),
+            WindDisplay::SE(deg, speed) => write!(f, "Wind {:.0} mph SE", speed * (11.0 / 25.0)),
+            WindDisplay::S(deg, speed) => write!(f, "Wind {:.0} mph S", speed * (11.0 / 25.0)),
+            WindDisplay::SW(deg, speed) => write!(f, "Wind {:.0} mph SW", speed * (11.0 / 25.0)),
+            WindDisplay::W(deg, speed) => write!(f, "Wind {:.0} mph W", speed * (11.0 / 25.0)),
+            WindDisplay::NW(deg, speed) => write!(f, "Wind {:.0} mph NW", speed * (11.0 / 25.0)),
+        }
+    }
+}
+
 // TODO: implement a way to get wind direction as well as speed. It would
 // probably be best to just create a `Display` implementation for `Wind`
 // that does the work--so that we can show things like "2mph NW," etc.
@@ -55,8 +101,8 @@ impl Weather {
     }
 
     /// Wind speed in miles per hour.
-    pub fn wind_speed(&self) -> f32 {
-        self.wind.speed * (11.0 / 25.0)
+    pub fn wind(&self) -> WindDisplay {
+        self.wind.display()
     }
 }
 

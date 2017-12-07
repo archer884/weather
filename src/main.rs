@@ -21,10 +21,10 @@ fn main() {
             Err(e) => println!("{}", e),
             Ok(result) => {
                 println!(
-                    "{}: {:.0} (wind speed: {:.0} mph)",
+                    "{}: {:.0}°, {}",
                     result.city(),
                     result.temperature(),
-                    result.wind_speed()
+                    result.wind()
                 )
             }
         }
