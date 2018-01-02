@@ -86,9 +86,6 @@ impl fmt::Display for WindDisplay {
     }
 }
 
-// TODO: implement a way to get wind direction as well as speed. It would
-// probably be best to just create a `Display` implementation for `Wind`
-// that does the work--so that we can show things like "2mph NW," etc.
 impl Weather {
     /// The name of the nearest city.
     pub fn city(&self) -> &str {
