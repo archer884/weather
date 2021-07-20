@@ -1,12 +1,13 @@
 [package]
 name = "weather"
-version = "0.1.0"
+version = "0.2.0"
 authors = ["J/A <archer884@gmail.com>"]
+edition = "2018"
 
 [dependencies]
-dotenv = "*"
-dotenv_macros = "*"
-reqwest = "*"
-serde = "*"
-serde_derive = "*"
-serde_json = "*"
+clap = { git = "https://github.com/clap-rs/clap" }
+directories = "3.0.2"
+dotenv = "0.15.0"
+reqwest = { version = "0.11.4", features = ["blocking", "json"] }
+serde = { version = "1.0.126", features = ["derive"] }
+serde_json = "1.0.64"

@@ -2,9 +2,12 @@
 // removing a lot of model properties that are not currently used by may eventually be used.
 #![allow(unused)]
 
+use std::{
+    error,
+    fmt::{self, Display},
+};
+
 use serde::{Deserialize, Deserializer};
-use std::error;
-use std::fmt;
 
 #[derive(Deserialize)]
 pub struct Weather {
@@ -53,27 +56,27 @@ pub enum WindDisplay {
 
 impl Wind {
     pub fn display(&self) -> WindDisplay {
+        // Implementation updated to avoid clippy's complaint re:
+        // manual reimplementation of Range::<f32>::contains()
         match self.deg % 360.0 {
-            // North is split in two, because half is on the left side of 0.
-            deg if deg >= 337.5 && deg < 360.0 => WindDisplay::N(deg, self.speed), 
-            deg if deg >= 0.0 && deg < 22.5 => WindDisplay::N(deg, self.speed),
-            
-            deg if deg >= 22.5 && deg < 67.5 => WindDisplay::NE(deg, self.speed),
-            deg if deg >= 67.5 && deg < 112.5 => WindDisplay::E(deg, self.speed),
-            deg if deg >= 112.5 && deg < 157.5 => WindDisplay::SE(deg, self.speed),
-            deg if deg >= 157.5 && deg < 202.5 => WindDisplay::S(deg, self.speed),
-            deg if deg >= 202.5 && deg < 247.5 => WindDisplay::SW(deg, self.speed),
-            deg if deg >= 247.5 && deg < 292.5 => WindDisplay::W(deg, self.speed),
-            deg if deg >= 292.5 && deg < 337.5 => WindDisplay::NW(deg, self.speed),
+            deg if deg + 22.5 >= 360.0 => WindDisplay::N(deg, self.speed),
+            deg if deg + 22.5 >= 45.0 => WindDisplay::NE(deg, self.speed),
+            deg if deg + 22.5 >= 90.0 => WindDisplay::E(deg, self.speed),
+            deg if deg + 22.5 >= 135.0 => WindDisplay::SE(deg, self.speed),
+            deg if deg + 22.5 >= 180.0 => WindDisplay::S(deg, self.speed),
+            deg if deg + 22.5 >= 225.0 => WindDisplay::SW(deg, self.speed),
+            deg if deg + 22.5 >= 270.0 => WindDisplay::W(deg, self.speed),
+            deg if deg + 22.5 >= 315.0 => WindDisplay::NW(deg, self.speed),
 
+            // We've run out of compass directions
             _ => panic!("What a world! What a world...."),
         }
     }
 }
 
-impl fmt::Display for WindDisplay {
+impl Display for WindDisplay {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        match *self {
+        match self {
             WindDisplay::N(deg, speed) => write!(f, "Wind {:.0} mph N", speed * (11.0 / 25.0)),
             WindDisplay::NE(deg, speed) => write!(f, "Wind {:.0} mph NE", speed * (11.0 / 25.0)),
             WindDisplay::E(deg, speed) => write!(f, "Wind {:.0} mph E", speed * (11.0 / 25.0)),
@@ -119,6 +122,8 @@ impl<'a> Deserialize<'a> for ApiError {
         //
         // In this case, I also make use of a fairly easy mechanism for converting numeric
         // parsing errors into deserialization errors.
+        //
+        // Updated 2021/07/20: I didn't update this implementation from four years ago!
 
         #[derive(Deserialize)]
         struct Template {
@@ -129,29 +134,32 @@ impl<'a> Deserialize<'a> for ApiError {
 
         let Template { code, message } = Template::deserialize(d)?;
         Ok(Self {
-            code: code.parse().map_err(|e| D::Error::custom(e))?,
+            code: code.parse().map_err(D::Error::custom)?,
             message,
         })
     }
 }
 
-impl fmt::Display for ApiError {
+impl Display for ApiError {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         write!(f, "{}: {}", self.code, self.message)
     }
 }
 
-impl error::Error for ApiError {
-    fn description(&self) -> &str {
-        "An API error occurred"
-    }
+impl error::Error for ApiError {}
+
+#[derive(Deserialize)]
+#[serde(untagged)]
+pub enum ApiResponse {
+    Weather(Weather),
+    Error(ApiError),
 }
 
 #[cfg(test)]
 mod tests {
     use serde_json as json;
 
-    static DATA: &'static str = include_str!("../response.json");
+    static DATA: &'static str = include_str!("../resource/response.json");
 
     #[test]
     fn deserialize() {
