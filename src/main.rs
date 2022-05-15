@@ -1,23 +1,23 @@
-use std::{fmt::Display, io};
-
 mod model;
 
-use clap::Clap;
+use std::{fmt::Display, io};
+
+use clap::Parser;
 use model::ApiResponse;
 
-#[derive(Clap, Clone, Debug)]
-enum Opts {
+#[derive(Clone, Debug, Parser)]
+enum Args {
     City { city: String },
     Zip { zip: String },
     Id { id: String },
 }
 
-impl Opts {
+impl Args {
     fn query(&self) -> Query {
         match self {
-            Opts::City { city } => Query::City(city),
-            Opts::Zip { zip: zip_code } => Query::Zip(zip_code),
-            Opts::Id { id } => Query::Id(id),
+            Args::City { city } => Query::City(city),
+            Args::Zip { zip: zip_code } => Query::Zip(zip_code),
+            Args::Id { id } => Query::Id(id),
         }
     }
 }
@@ -32,25 +32,26 @@ enum Query<'a> {
 impl Display for Query<'_> {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
-            Query::City(city) => write!(f, "q={}", city),
-            Query::Zip(zip) => write!(f, "zip={}", zip),
-            Query::Id(id) => write!(f, "id={}", id),
+            Query::City(city) => write!(f, "q={city}"),
+            Query::Zip(zip) => write!(f, "zip={zip}"),
+            Query::Id(id) => write!(f, "id={id}"),
         }
     }
 }
 
 fn main() {
-    let opts = Opts::parse();
-    if let Err(e) = dispatch(&opts) {
+    let opts = Args::parse();
+    if let Err(e) = run(&opts) {
         eprintln!("{}", e);
         std::process::exit(1);
     }
 }
 
-fn dispatch(opts: &Opts) -> Result<(), Box<dyn std::error::Error + 'static>> {
+fn run(opts: &Args) -> Result<(), Box<dyn std::error::Error + 'static>> {
     let home = directories::UserDirs::new()
         .map(|dirs| dirs.home_dir().to_owned())
         .ok_or_else(|| io::Error::new(io::ErrorKind::NotFound, "user profile not found"))?;
+
     dotenv::from_path(home.join(".weather.conf"))?;
 
     let url = format!(

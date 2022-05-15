@@ -58,15 +58,15 @@ impl Wind {
     pub fn display(&self) -> WindDisplay {
         // Implementation updated to avoid clippy's complaint re:
         // manual reimplementation of Range::<f32>::contains()
-        match self.deg % 360.0 {
-            deg if deg + 22.5 >= 360.0 => WindDisplay::N(deg, self.speed),
-            deg if deg + 22.5 >= 45.0 => WindDisplay::NE(deg, self.speed),
-            deg if deg + 22.5 >= 90.0 => WindDisplay::E(deg, self.speed),
-            deg if deg + 22.5 >= 135.0 => WindDisplay::SE(deg, self.speed),
-            deg if deg + 22.5 >= 180.0 => WindDisplay::S(deg, self.speed),
-            deg if deg + 22.5 >= 225.0 => WindDisplay::SW(deg, self.speed),
-            deg if deg + 22.5 >= 270.0 => WindDisplay::W(deg, self.speed),
-            deg if deg + 22.5 >= 315.0 => WindDisplay::NW(deg, self.speed),
+        match (self.deg % 360.0) + 22.5 {
+            deg if deg >= 360.0 => WindDisplay::N(deg, self.speed),
+            deg if deg >= 45.0 => WindDisplay::NE(deg, self.speed),
+            deg if deg >= 90.0 => WindDisplay::E(deg, self.speed),
+            deg if deg >= 135.0 => WindDisplay::SE(deg, self.speed),
+            deg if deg >= 180.0 => WindDisplay::S(deg, self.speed),
+            deg if deg >= 225.0 => WindDisplay::SW(deg, self.speed),
+            deg if deg >= 270.0 => WindDisplay::W(deg, self.speed),
+            deg if deg >= 315.0 => WindDisplay::NW(deg, self.speed),
 
             // We've run out of compass directions
             _ => panic!("What a world! What a world...."),
