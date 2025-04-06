@@ -2,7 +2,7 @@
 name = "weather"
 version = "0.2.0"
 authors = ["J/A <archer884@gmail.com>"]
-edition = "2024"
+edition = "2021"
 
 [dependencies]
 clap = { version = "4.5.35", features = ["derive", "wrap_help"] }
